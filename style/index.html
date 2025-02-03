@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student Performance Prediction</title>
+    <style>
+      body {
+        background: url("/style/performance.avif") no-repeat center center/cover;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        box-sizing: border-box;
+      }
+
+      .container {
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(34, 32, 34, 0.3); /* Increased blur and opacity */
+
+        width: 100%;
+        max-width: 600px;
+        overflow-y: auto;
+      }
+
+      h1 {
+        text-align: center;
+        color: #3a924e;
+        margin-bottom: 20px;
+      }
+
+      form {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      label {
+        font-weight: bold;
+        color: #216f81;
+      }
+
+      input,
+      select {
+        background-color: #676668;
+        color: #ccc;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      button {
+        padding: 10px;
+        background-color: #5eeade;
+        color: rgb(59, 56, 56);
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 10px;
+      }
+
+      button:hover {
+        background-color: #07f2fa;
+      }
+
+      .result {
+        margin-top: 20px;
+        padding: 15px;
+        background-color: #e9f5e9;
+        border: 1px solid #d4edda;
+        border-radius: 5px;
+        color: #155724;
+        font-size: 1.2em;
+        text-align: center;
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Predict Student Performance</h1>
+      <form id="prediction-form">
+        <label for="Hours_Studied">Hours Studied:</label>
+        <input
+          type="number"
+          id="Hours_Studied"
+          name="Hours_Studied"
+          step="0.1"
+          required
+        />
+
+        <label for="Attendance">Attendance (%):</label>
+        <input
+          type="number"
+          id="Attendance"
+          name="Attendance"
+          step="0.1"
+          required
+        />
+
+        <label for="Sleep_Hours">Sleep Hours:</label>
+        <input
+          type="number"
+          id="Sleep_Hours"
+          name="Sleep_Hours"
+          step="0.1"
+          required
+        />
+
+        <label for="Previous_Scores">Previous Scores:</label>
+        <input
+          type="number"
+          id="Previous_Scores"
+          name="Previous_Scores"
+          step="0.1"
+          required
+        />
+
+        <label for="Parental_Involvement"
+          >Parental Involvement (low(0), medium(1), high(1)):</label
+        >
+        <input
+          type="number"
+          id="Parental_Involvement"
+          name="Parental_Involvement"
+          min="1"
+          max="5"
+          required
+        />
+
+        <label for="Motivation_Level"
+          >Motivation Level (low(0), medium(1), high(1)):</label
+        >
+        <input
+          type="number"
+          id="Motivation_Level"
+          name="Motivation_Level"
+          min="1"
+          max="5"
+          required
+        />
+
+        <label for="Teacher_Quality"
+          >Teacher Quality (low(0), medium(1), high(1)):</label
+        >
+        <input
+          type="number"
+          id="Teacher_Quality"
+          name="Teacher_Quality"
+          min="1"
+          max="5"
+          required
+        />
+
+        <label for="Internet_Access">Internet Access (No(0), Yes(1)):</label>
+        <input
+          type="number"
+          id="Internet_Access"
+          name="Internet_Access"
+          min="0"
+          max="1"
+          required
+        />
+
+        <label for="Extracurricular_Activities"
+          >Extracurricular Activities (No(0), Yes(1)):</label
+        >
+        <input
+          type="number"
+          id="Extracurricular_Activities"
+          name="Extracurricular_Activities"
+          min="0"
+          max="1"
+          required
+        />
+
+        <label for="Family_Income"
+          >Family Income (low(0), medium(1), high(1)):</label
+        >
+        <input
+          type="number"
+          id="Family_Income"
+          name="Family_Income"
+          step="0.1"
+          required
+        />
+
+        <label for="Learning_Disabilities"
+          >Learning Disabilities (No(0), Yes(1)):</label
+        >
+        <input
+          type="number"
+          id="Learning_Disabilities"
+          name="Learning_Disabilities"
+          min="0"
+          max="1"
+          required
+        />
+
+        <label for="Physical_Activity"
+          >Physical Activity ((Hours per Week)):</label
+        >
+        <input
+          type="number"
+          id="Physical_Activity"
+          name="Physical_Activity"
+          step="0.1"
+          required
+        />
+
+        <label for="Distance_from_Home"
+          >Distance from Home (Near(0), Moderate(1), Far(1)):</label
+        >
+        <input
+          type="number"
+          id="Distance_from_Home"
+          name="Distance_from_Home"
+          step="0.1"
+          required
+        />
+
+        <label for="Access_to_Resources"
+          >Access to Resources (low(0), medium(1), high(1)):</label
+        >
+        <input
+          type="number"
+          id="Access_to_Resources"
+          name="Access_to_Resources"
+          min="0"
+          max="1"
+          required
+        />
+
+        <label for="Gender">Gender (Female(0), Male(1)):</label>
+        <input
+          type="number"
+          id="Gender"
+          name="Gender"
+          min="0"
+          max="1"
+          required
+        />
+
+        <label for="Parental_Education_Level"
+          >Parental Education Level (High School(0), Collage(1),
+          PostGraduate(2)):</label
+        >
+        <input
+          type="number"
+          id="Parental_Education_Level"
+          name="Parental_Education_Level"
+          min="0"
+          max="1"
+          required
+        />
+
+        <label for="Peer_Influence"
+          >Peer Influence (Negative(0), Neutral(1), Positive(2)):</label
+        >
+        <input
+          type="number"
+          id="Peer_Influence"
+          name="Peer_Influence"
+          min="0"
+          max="1"
+          required
+        />
+
+        <label for="School_Type">School Type (Public(0),Private(1)):</label>
+        <input
+          type="number"
+          id="School_Type"
+          name="School_Type"
+          min="0"
+          max="1"
+          required
+        />
+
+        <label for="Tutoring_Sessions"
+          >Tutoring Sessions (Hours per Week):</label
+        >
+        <input
+          type="number"
+          id="Tutoring_Sessions"
+          name="Tutoring_Sessions"
+          step="0.1"
+          required
+        />
+
+        <button type="button" onclick="predictPerformance()">Predict</button>
+      </form>
+
+      <!-- Result Container -->
+      <div id="result" class="result"></div>
+    </div>
+
+    <script>
+      async function predictPerformance() {
+        const formData = {
+          Hours_Studied: parseFloat(
+            document.getElementById("Hours_Studied").value
+          ),
+          Attendance: parseFloat(document.getElementById("Attendance").value),
+          Sleep_Hours: parseFloat(document.getElementById("Sleep_Hours").value),
+          Previous_Scores: parseFloat(
+            document.getElementById("Previous_Scores").value
+          ),
+          Parental_Involvement: parseInt(
+            document.getElementById("Parental_Involvement").value
+          ),
+          Motivation_Level: parseInt(
+            document.getElementById("Motivation_Level").value
+          ),
+          Teacher_Quality: parseInt(
+            document.getElementById("Teacher_Quality").value
+          ),
+          Internet_Access: parseInt(
+            document.getElementById("Internet_Access").value
+          ),
+          Extracurricular_Activities: parseInt(
+            document.getElementById("Extracurricular_Activities").value
+          ),
+          Family_Income: parseFloat(
+            document.getElementById("Family_Income").value
+          ),
+          Learning_Disabilities: parseInt(
+            document.getElementById("Learning_Disabilities").value
+          ),
+          Physical_Activity: parseFloat(
+            document.getElementById("Physical_Activity").value
+          ),
+          Distance_from_Home: parseFloat(
+            document.getElementById("Distance_from_Home").value
+          ),
+          Access_to_Resources: parseInt(
+            document.getElementById("Access_to_Resources").value
+          ),
+          Gender: parseInt(document.getElementById("Gender").value),
+          Parental_Education_Level: parseInt(
+            document.getElementById("Parental_Education_Level").value
+          ),
+          Peer_Influence: parseInt(
+            document.getElementById("Peer_Influence").value
+          ),
+          School_Type: parseInt(document.getElementById("School_Type").value),
+          Tutoring_Sessions: parseFloat(
+            document.getElementById("Tutoring_Sessions").value
+          ),
+        };
+
+        try {
+          const response = await fetch("http://127.0.0.1:8000/predict", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formData),
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+
+          const data = await response.json();
+
+          // Display the result
+          const resultDiv = document.getElementById("result");
+          resultDiv.textContent = `Predicted Exam Score: ${data["Predicted Exam Score"]}`;
+          resultDiv.style.display = "block";
+        } catch (error) {
+          console.error("Error:", error);
+          alert("Failed to fetch prediction.");
+        }
+      }
+    </script>
+  </body>
+</html>
