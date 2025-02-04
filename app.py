@@ -3,7 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import joblib
 import numpy as np
-
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 # Define the input data model
 class StudentPerformanceInput(BaseModel):
     Hours_Studied: float
@@ -34,7 +35,7 @@ except Exception as e:
 
 # Initialize the FastAPI app
 app = FastAPI()
-
+app.mount("/style", StaticFiles(directory="style"), name="style")
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
@@ -46,7 +47,7 @@ app.add_middleware(
 # Root endpoint
 @app.get("/")
 async def root():
-    return {"message": "Welcome to the Student Performance Prediction API!"}
+     return FileResponse("style/index.html")
 
 @app.post("/predict")
 async def predict_performance(input_data: StudentPerformanceInput):
