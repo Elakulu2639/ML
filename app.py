@@ -43,6 +43,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Root endpoint
+@app.get("/")
+async def root():
+    return {"message": "Welcome to the Student Performance Prediction API!"}
+
 @app.post("/predict")
 async def predict_performance(input_data: StudentPerformanceInput):
     try:
