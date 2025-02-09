@@ -1,84 +1,81 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import joblib
-import numpy as np
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
-# Define the input data model
+import numpy as np
+import joblib
+import pandas as pd
+
+# Load model and scaler
+model = joblib.load("student_performance_model.pkl")
+scaler = joblib.load("scaler.pkl")
+
+# Define input model (MATCHING MODEL'S FEATURE ORDER)
 class StudentPerformanceInput(BaseModel):
     Hours_Studied: float
     Attendance: float
+    Parental_Involvement: int
+    Access_to_Resources: int
+    Extracurricular_Activities: int
     Sleep_Hours: float
     Previous_Scores: float
-    Parental_Involvement: int
     Motivation_Level: int
-    Teacher_Quality: int
     Internet_Access: int
-    Extracurricular_Activities: int
-    Family_Income: float
-    Learning_Disabilities: int
-    Physical_Activity: float
-    Distance_from_Home: float
-    Access_to_Resources: int
-    Gender: int
-    Parental_Education_Level: int
-    Peer_Influence: int
-    School_Type: int
     Tutoring_Sessions: float
+    Family_Income: int
+    Teacher_Quality: int
+    School_Type: int
+    Peer_Influence: int
+    Physical_Activity: float
+    Learning_Disabilities: int
+    Parental_Education_Level: int
+    Distance_from_Home: int
+    Gender: int
 
-# Load the trained model
-try:
-    model = joblib.load("student_performance_model.pkl")
-except Exception as e:
-    raise RuntimeError(f"Failed to load the model: {e}")
-
-# Initialize the FastAPI app
 app = FastAPI()
-app.mount("/style", StaticFiles(directory="style"), name="style")
-# Add CORS middleware
+
+# Enable CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins; adjust for production
+    allow_origins=["*"],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Root endpoint
+app.mount("/style", StaticFiles(directory="style"), name="style")
+
 @app.get("/")
-async def root():
-     return FileResponse("style/index.html")
+async def read_root():
+    return FileResponse("style/index.html")
 
 @app.post("/predict")
 async def predict_performance(input_data: StudentPerformanceInput):
     try:
-        # Convert input data to a NumPy array
-        input_array = np.array([
-            input_data.Hours_Studied,
-            input_data.Attendance,
-            input_data.Sleep_Hours,
-            input_data.Previous_Scores,
-            input_data.Parental_Involvement,
-            input_data.Motivation_Level,
-            input_data.Teacher_Quality,
-            input_data.Internet_Access,
-            input_data.Extracurricular_Activities,
-            input_data.Family_Income,
-            input_data.Learning_Disabilities,
-            input_data.Physical_Activity,
-            input_data.Distance_from_Home,
-            input_data.Access_to_Resources,
-            input_data.Gender,
-            input_data.Parental_Education_Level,
-            input_data.Peer_Influence,
-            input_data.School_Type,
-            input_data.Tutoring_Sessions
-        ]).reshape(1, -1)
-
-        # Make prediction
-        prediction = model.predict(input_array)
-
-        # Return the prediction
-        return {"Predicted Exam Score": prediction[0]}
+        # Convert to DataFrame with EXACT TRAINING FEATURE ORDER
+        input_dict = input_data.dict()
+        
+        # Critical: Match the feature order seen in the error message
+        columns_order = [
+            'Hours_Studied', 'Attendance', 'Parental_Involvement',
+            'Access_to_Resources', 'Extracurricular_Activities',
+            'Sleep_Hours', 'Previous_Scores', 'Motivation_Level',
+            'Internet_Access', 'Tutoring_Sessions', 'Family_Income',
+            'Teacher_Quality', 'School_Type', 'Peer_Influence',
+            'Physical_Activity', 'Learning_Disabilities',
+            'Parental_Education_Level', 'Distance_from_Home', 'Gender'
+        ]
+        
+        input_df = pd.DataFrame([input_dict], columns=columns_order)
+        
+        # Scale numerical features (same as training)
+        numerical_cols = ["Hours_Studied", "Sleep_Hours", "Previous_Scores", "Physical_Activity"]
+        input_df[numerical_cols] = scaler.transform(input_df[numerical_cols])
+        
+        # Predict
+        prediction = model.predict(input_df)
+        
+        return {"Predicted Exam Score": float(prediction[0])}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error making prediction: {e}")
+        raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}")
