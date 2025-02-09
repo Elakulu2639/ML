@@ -57,7 +57,7 @@ Use the /predict endpoint to send a JSON payload with student data and receive t
 
 🌐 Live Deployment
 The API is deployed on Render and accessible at:
-https://ml-7-bkw0.onrender.com
+https://ml-8-ztbs.onrender.com
 
 📊 Model Performance
 Best Model (Random Forest Regressor):
